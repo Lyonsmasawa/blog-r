@@ -7,7 +7,7 @@ const fileFilter = (req, file, cb) => {
     return cb("Invalid image format!", false);
   }
   cb(null, true);
-  console.log(file);
+//   console.log(file);
 };
 
 const upload = multer({ storage, fileFilter });
