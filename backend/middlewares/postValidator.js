@@ -13,7 +13,7 @@ export const postValidator = [
     .isEmpty()
     .withMessage("Meta description is missing"),
   check("slug").trim().not().isEmpty().withMessage("Slug is missing"),
-  check("content")
+  check("tags")
     .isArray()
     .withMessage("Tags must be array of strings!")
     .custom((tags) => {
