@@ -1,7 +1,7 @@
 import { postModelSchema } from "../models/models.js";
 
 export const createPost = (req, res) => {
-  console.log(req.body) // - cant without express.json() middleware
+  console.log(req.body); // - cant without express.json() middleware
   const { title, meta, content, slug, tags, author } = req.body;
 
   const newPost = new postModelSchema({
@@ -10,7 +10,7 @@ export const createPost = (req, res) => {
     content,
     slug,
     tags,
-    author,    
+    author,
   });
-  res.json(newPost)
+  res.json(newPost);
 };

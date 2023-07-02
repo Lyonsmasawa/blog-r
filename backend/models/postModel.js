@@ -20,6 +20,7 @@ const postSchema = mongoose.Schema({
     type: String,
     trim: true,
     required: true,
+    unique: true,
   },
   tags: [String],
   author: {
