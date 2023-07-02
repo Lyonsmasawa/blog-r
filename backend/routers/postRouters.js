@@ -1,7 +1,18 @@
-import { Router } from "express"
-import { createPost } from "../controllers/post.js"
-const postRouters = Router()
+import { Router } from "express";
+import { createPost } from "../controllers/post.js";
+const postRouters = Router();
 
-postRouters.post('/create', createPost)
+// postRouters.post(
+//     "/create",
+//     (req, res, next) => {
+//       req.on('data', (chunk) => {
+//         console.log(chunk);
+//         next()
+//       });
+//     },
+//     createPost
+//   ); thats where express.json comes in
 
-export default postRouters // or module.exports = postRouters
+postRouters.post("/create", createPost);
+
+export default postRouters; // or module.exports = postRouters
