@@ -1,7 +1,12 @@
+import cloudinary from "../cloud/index.js";
+import { uploader, url } from "cloudinary";
 import { Post, FeaturedPost } from "../models/models.js";
 
 const FEATURED_POST_COUNT = 4;
 const addToFeaturedPost = async (postId) => {
+  const isAlreadyExist = await FeaturedPost.findOne({ post: postId });
+  if (isAlreadyExist) return;
+
   const featuredPost = new FeaturedPost({ post: postId });
   await featuredPost.save();
 
@@ -16,6 +21,11 @@ export const createPost = async (req, res, next) => {
   // console.log(req.body); // - cant without express.json() middleware - see middleware on postRouter
   try {
     const { title, meta, content, slug, tags, author, featured } = req.body;
+    const { file } = req.file;
+    const isAlreadyExist = await Post.findOne({ slug });
+
+    if (isAlreadyExist)
+      return res.status(401).json({ error: "Please use unique slug!" });
 
     const newPost = new Post({
       title,
@@ -25,6 +35,13 @@ export const createPost = async (req, res, next) => {
       tags,
       author,
     });
+
+    if (file) {
+      const { secure_url: url, public_id } = await cloudinary.uploader.upload(
+        file.path
+      );
+      newPost.thumbnail = { url, public_id };
+    }
 
     await newPost.save();
 
