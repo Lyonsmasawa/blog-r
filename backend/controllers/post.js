@@ -1,3 +1,4 @@
+import { isValidObjectId } from "mongoose";
 import cloudinary from "../cloud/index.js";
 import { Post, FeaturedPost } from "../models/models.js";
 
@@ -14,6 +15,15 @@ const addToFeaturedPost = async (postId) => {
     if (index >= FEATURED_POST_COUNT)
       await FeaturedPost.findByIdAndDelete(post._id);
   });
+};
+
+const removeFromFeaturedPost = async (postId) => {
+  await FeaturedPost.findOneAndDelete({ post: postId });
+};
+
+const isFeaturedPost = async (postId) => {
+  const post = await FeaturedPost.findOne({ post: postId });
+  return post ? true : false;
 };
 
 export const createPost = async (req, res, next) => {
@@ -53,7 +63,7 @@ export const createPost = async (req, res, next) => {
     res.json({
       post: {
         id: newPost._id,
-        title, 
+        title,
         meta,
         slug,
         thumbnail: newPost.thumbnail?.url,
@@ -79,4 +89,134 @@ export const createPost = async (req, res, next) => {
   // await newPost.sade();
 
   // res.json(newPost);
+};
+
+export const deletePost = async (req, res, next) => {
+  try {
+    const { postId } = req.params;
+
+    if (!isValidObjectId(postId))
+      return res.status(401).json({ error: "Invalid request!" });
+
+    const post = await Post.findById(postId);
+    if (!post) return res.status(404).json({ error: "Post not found!" });
+
+    const { public_id } = post.thumbnail || false;
+    if (public_id) {
+      const { result } = await cloudinary.uploader.destroy(public_id);
+
+      if (result !== "ok")
+        return res.status(404).json({ error: "Could not remove thumbnail!" });
+    }
+
+    await Post.findByIdAndDelete(postId);
+    res.json({ message: "Post removed successfully!" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const editPost = async (req, res, next) => {
+  try {
+    const { title, meta, content, slug, tags, author, featured } = req.body;
+    const { file } = req;
+    const { postId } = req.params;
+
+    if (!isValidObjectId(postId))
+      return res.status(401).json({ error: "Invalid request!" });
+
+    const post = await Post.findById(postId);
+    if (!post) return res.status(404).json({ error: "Post not found!" });
+
+    const { public_id } = post.thumbnail || false;
+    if (public_id && file) {
+      const { result } = await cloudinary.uploader.destroy(public_id);
+
+      if (result !== "ok")
+        return res.status(404).json({ error: "Could not remove thumbnail!" });
+    }
+
+    if (file) {
+      try {
+        const { secure_url: url, public_id } = await cloudinary.uploader.upload(
+          file.path
+        );
+        post.thumbnail = { url, public_id };
+      } catch (error) {
+        console.log("Error uploading file:", error);
+      }
+    }
+
+    post.title = title;
+    post.meta = meta;
+    post.content = content;
+    post.slug = slug;
+    post.tags = tags;
+    post.author = author;
+
+    if (featured) await addToFeaturedPost(post._id);
+    else await removeFromFeaturedPost(post._id);
+
+    await post.save();
+
+    res.json({
+      post: {
+        id: post._id,
+        title,
+        meta,
+        content,
+        slug,
+        tags,
+        thumbnail: post.thumbnail?.url,
+        author,
+        featured,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPost = async (req, res, next) => {
+  try {
+    const { postId } = req.params;
+
+    if (!isValidObjectId(postId))
+      return res.status(401).json({ error: "Invalid request!" });
+
+    const post = await Post.findById(postId);
+    if (!post) return res.status(404).json({ error: "Post not found!" });
+
+    const featured = await isFeaturedPost(post._id);
+    const { title, meta, content, slug, tags, author, createdAt } = post;
+    res.json({
+      post: {
+        id: post._id,
+        title,
+        meta,
+        content,
+        slug,
+        thumbnail: post.thumbnail?.url,
+        author,
+        tags,
+        featured,
+        createdAt,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getFeaturedPosts = async (req, res, next) => {
+  try {
+    const featuredPosts = await FeaturedPost.find({})
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .populate("post");
+
+    res.json({ posts: featuredPosts });
+  } catch (error) {
+    next(error);
+  }
 };
