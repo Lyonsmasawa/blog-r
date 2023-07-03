@@ -110,6 +110,7 @@ export const deletePost = async (req, res, next) => {
     }
 
     await Post.findByIdAndDelete(postId);
+    await removeFromFeaturedPost(postId)
     res.json({ message: "Post removed successfully!" });
   } catch (error) {
     next(error);
@@ -215,7 +216,18 @@ export const getFeaturedPosts = async (req, res, next) => {
       .limit(4)
       .populate("post");
 
-    res.json({ posts: featuredPosts });
+    res.json({
+      posts: featuredPosts.map(({ post }) => ({
+        post: {
+          id: post._id,
+          title: post.title,
+          meta: post.meta,
+          slug: post.slug,
+          author: post.author,
+          thumbnail: post.thumbnail?.url,
+        },
+      })),
+    });
   } catch (error) {
     next(error);
   }
