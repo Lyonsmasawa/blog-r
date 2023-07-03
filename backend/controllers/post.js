@@ -37,7 +37,9 @@ export const createPost = async (req, res, next) => {
 
     if (file) {
       try {
-        const { secure_url: url, public_id } = await cloudinary.uploader.upload(file.path);
+        const { secure_url: url, public_id } = await cloudinary.uploader.upload(
+          file.path
+        );
         newPost.thumbnail = { url, public_id };
       } catch (error) {
         console.log("Error uploading file:", error);
@@ -48,9 +50,18 @@ export const createPost = async (req, res, next) => {
 
     if (featured) await addToFeaturedPost(newPost._id);
 
-    res.json(newPost);
+    res.json({
+      post: {
+        id: newPost._id,
+        title, 
+        meta,
+        slug,
+        thumbnail: newPost.thumbnail?.url,
+        author: newPost.author,
+      },
+    });
   } catch (error) {
-    next(error); // using next means the app wont crash then we can catch it in app.js
+    next(error); // using next means the app wont crash bcoz of an error then we can catch it in app.js
   }
 
   // // to not use the try-catch we can use a package called -express-async-errors - import it in app.js as a middleware and remoove try catch block
