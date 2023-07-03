@@ -75,7 +75,7 @@ export const createPost = async (req, res, next) => {
   }
 
   // // to not use the try-catch we can use a package called -express-async-errors - import it in app.js as a middleware and remoove try catch block
-  // const { title, meta, content, slug, tags, author } = req.body;
+  // const { title, meta, content, slug, tags, author } = req.body;import upload from './../middlewares/multer';
 
   // const newPost = new post({
   //   title,
@@ -180,16 +180,15 @@ export const editPost = async (req, res, next) => {
 
 export const getPost = async (req, res, next) => {
   try {
-    const { postId } = req.params;
+    const { slug } = req.params;
 
-    if (!isValidObjectId(postId))
-      return res.status(401).json({ error: "Invalid request!" });
+    if (!slug) return res.status(401).json({ error: "Invalid request!" });
 
-    const post = await Post.findById(postId);
+    const post = await Post.findOne({ slug });
     if (!post) return res.status(404).json({ error: "Post not found!" });
 
     const featured = await isFeaturedPost(post._id);
-    const { title, meta, content, slug, tags, author, createdAt } = post;
+    const { title, meta, content, tags, author, createdAt } = post;
     res.json({
       post: {
         id: post._id,
@@ -261,12 +260,12 @@ export const getPosts = async (req, res, next) => {
 
 export const searchPost = async (req, res, next) => {
   try {
-    const { pageNo = 0, limit = 10 } = req.query;
+    const { title } = req.query;
 
-    const posts = await Post.find({})
-      .sort({ createdAt: -1 })
-      .skip(parseInt(pageNo) * parseInt(limit))
-      .limit(parseInt(limit));
+    if (!title)
+      return res.status(401).json({ error: "search query is missing!" });
+
+    const posts = await Post.find({ title: { $regex: title, $options: "i" } });
 
     res.json({
       posts: posts.map((post) => ({
@@ -280,6 +279,59 @@ export const searchPost = async (req, res, next) => {
         },
       })),
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getRelatedPosts = async (req, res, next) => {
+  try {
+    const { postId } = req.params;
+
+    if (!isValidObjectId(postId))
+      return res.status(401).json({ error: "Invalid request!" });
+
+    const post = await Post.findById(postId);
+    if (!post) return res.status(404).json({ error: "Post not found!" });
+
+    const relatedPosts = await Post.find({
+      tags: { $in: [...post.tags] },
+      _id: { $ne: post._id },
+    })
+      .sort({ createdAt: -1 })
+      .limit(5);
+
+    res.json({
+      posts: relatedPosts.map((post) => ({
+        post: {
+          id: post._id,
+          title: post.title,
+          meta: post.meta,
+          slug: post.slug,
+          author: post.author,
+          thumbnail: post.thumbnail?.url,
+        },
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const uploadImage = async (req, res, next) => {
+  try {
+    const { file } = req;
+
+    if (!file)
+      return res.status(401).json({ error: "file is missing!" });
+
+    try {
+      const { secure_url: url } = await cloudinary.uploader.upload(file.path);
+      res.status(201).json({ image: url });
+    } catch (error) {
+      console.log("Error uploading file:", error);
+      res.status(401).json({ error: error });
+    }
   } catch (error) {
     next(error);
   }
