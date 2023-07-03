@@ -110,7 +110,7 @@ export const deletePost = async (req, res, next) => {
     }
 
     await Post.findByIdAndDelete(postId);
-    await removeFromFeaturedPost(postId)
+    await removeFromFeaturedPost(postId);
     res.json({ message: "Post removed successfully!" });
   } catch (error) {
     next(error);
@@ -218,6 +218,58 @@ export const getFeaturedPosts = async (req, res, next) => {
 
     res.json({
       posts: featuredPosts.map(({ post }) => ({
+        post: {
+          id: post._id,
+          title: post.title,
+          meta: post.meta,
+          slug: post.slug,
+          author: post.author,
+          thumbnail: post.thumbnail?.url,
+        },
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPosts = async (req, res, next) => {
+  try {
+    const { pageNo = 0, limit = 10 } = req.query;
+
+    const posts = await Post.find({})
+      .sort({ createdAt: -1 })
+      .skip(parseInt(pageNo) * parseInt(limit))
+      .limit(parseInt(limit));
+
+    res.json({
+      posts: posts.map((post) => ({
+        post: {
+          id: post._id,
+          title: post.title,
+          meta: post.meta,
+          slug: post.slug,
+          author: post.author,
+          thumbnail: post.thumbnail?.url,
+        },
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const searchPost = async (req, res, next) => {
+  try {
+    const { pageNo = 0, limit = 10 } = req.query;
+
+    const posts = await Post.find({})
+      .sort({ createdAt: -1 })
+      .skip(parseInt(pageNo) * parseInt(limit))
+      .limit(parseInt(limit));
+
+    res.json({
+      posts: posts.map((post) => ({
         post: {
           id: post._id,
           title: post.title,
