@@ -4,7 +4,7 @@ import dateFormat from "dateformat";
 import { BsPencilSquare, BsTrash } from "react-icons/bs";
 import { Link } from "react-router-dom";
 
-const PostCard = ({ post }) => {
+const PostCard = ({ post, onDeleteClick }) => {
   if (!post) return null;
   const {
     post: { title, thumbnail, tags, meta, createdAt, slug },
@@ -27,9 +27,9 @@ const PostCard = ({ post }) => {
           <Link to={`/update-post/${slug}`} className="w-8 h-8 rounded-full bg-blue-400 hover:bg-blue-600 justify-center items-center text-white">
             <BsPencilSquare />
           </Link>
-          <Link to={`/update-post/${slug}`}  className="w-8 h-8 rounded-full bg-red-400 hover:bg-red-600 justify-center items-center text-white">
+          <button onClick={() => onDeleteClick(post)} className="w-8 h-8 rounded-full bg-red-400 hover:bg-red-600 justify-center items-center text-white">
             <BsTrash />
-          </Link>
+          </button>
         </div>
       </div>
     </div>

@@ -281,6 +281,8 @@ export const searchPost = async (req, res, next) => {
           slug: post.slug,
           author: post.author,
           thumbnail: post.thumbnail?.url,
+          createdAt: post.createdAt,
+          tags: post.tags,
         },
       })),
     });
