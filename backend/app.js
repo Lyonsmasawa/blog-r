@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import postRouters from "./routers/postRouters.js"; // or const postRouters = require('./routers/post')
 import connectDB from "./db/index.js";
 import morgan from "morgan";
+import cors from "cors";
 
 connectDB();
 dotenv.config();
@@ -11,6 +12,7 @@ dotenv.config();
 const PORT = process.env.PORT;
 
 const app = express();
+app.use(cors({ origin: "http://localhost:5173" }));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use("/api/post", postRouters);
@@ -19,7 +21,7 @@ app.use("/api/post", postRouters);
 app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message });
 });
-// // auto handle erros 
+// // auto handle erros
 // expressAsyncErrors(app)
 
 app.listen(PORT, () => {

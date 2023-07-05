@@ -241,6 +241,8 @@ export const getPosts = async (req, res, next) => {
       .skip(parseInt(pageNo) * parseInt(limit))
       .limit(parseInt(limit));
 
+    const postCount = await Post.countDocuments();
+
     res.json({
       posts: posts.map((post) => ({
         post: {
@@ -250,8 +252,11 @@ export const getPosts = async (req, res, next) => {
           slug: post.slug,
           author: post.author,
           thumbnail: post.thumbnail?.url,
+          createdAt: post.createdAt,
+          tags: post.tags,
         },
       })),
+      postCount,
     });
   } catch (error) {
     next(error);
@@ -322,8 +327,7 @@ export const uploadImage = async (req, res, next) => {
   try {
     const { file } = req;
 
-    if (!file)
-      return res.status(401).json({ error: "file is missing!" });
+    if (!file) return res.status(401).json({ error: "file is missing!" });
 
     try {
       const { secure_url: url } = await cloudinary.uploader.upload(file.path);

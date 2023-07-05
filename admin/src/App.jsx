@@ -47,7 +47,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/create-post" element={<CreatePost />} />
-            <Route path="/update-post" element={<UpdatePost />} />
+            <Route pah='/update-post/:slug'  element={<UpdatePost />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           
