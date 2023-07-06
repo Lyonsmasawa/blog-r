@@ -6,6 +6,7 @@ import {
   ImFilesEmpty,
 } from "react-icons/im";
 import { uploadImage } from "../api/post";
+import { useNotification } from "../context/NoificationProvider";
 
 const mdRules = [
   { title: "From h1 to h6", rule: "# Heading -> ###### Heading" },
@@ -27,8 +28,11 @@ const CreatePost = () => {
   const [postInfo, setPostInfo] = useState({ ...defaultPost });
   const { title, featured, tags, meta, content } = postInfo;
   const [imageUrlToCopy, setImageUrlToCopy] = useState("");
+  const [imageUploading, setImageUploading] = useState(false);
 
   const [selectedImageUrl, setSelectedImageUrl] = useState("");
+
+  const {updateNotification} = useNotification()
 
   const handleChange = ({ target }) => {
     const { value, name, checked } = target;
@@ -58,16 +62,25 @@ const CreatePost = () => {
   };
 
   const handleImageUpload = async ({ target }) => {
+    if (imageUploading) return;
+
     const file = target.files[0];
     if (!file.type.includes("image")) {
-      return alert("this is not an image!");
+      return updateNotification("error", "this is not an image!");
     }
+    setImageUploading(true);
 
     const formData = new FormData();
     formData.append("image", file);
     const { error, image } = await uploadImage(formData);
+    setImageUploading(false);
     if (error) return console.log(error);
     setImageUrlToCopy(image);
+  };
+
+  const handleOnCopy = () => {
+    const textToCopy = `![Add image description](${imageUrlToCopy})`;
+    navigator.clipboard.writeText(textToCopy);
   };
 
   return (
@@ -79,15 +92,24 @@ const CreatePost = () => {
           </h1>
 
           <div className="flex items-center space-x-5">
-            <button className="flex items-center space-x-2 px-3 ring-1 text-blue-500 hover:text-white hover:bg-blue-500 transition ring-blue-500 rounded h-10 ">
+            <button
+              type="button"
+              className="flex items-center space-x-2 px-3 ring-1 text-blue-500 hover:text-white hover:bg-blue-500 transition ring-blue-500 rounded h-10 "
+            >
               <ImSpinner11 />
               <span>Reset</span>
             </button>
-            <button className="flex items-center space-x-2 px-3 ring-1 text-blue-500 hover:text-white hover:bg-blue-500 transition ring-blue-500 rounded h-10 ">
+            <button
+              type="button"
+              className="flex items-center space-x-2 px-3 ring-1 text-blue-500 hover:text-white hover:bg-blue-500 transition ring-blue-500 rounded h-10 "
+            >
               <ImEye />
               <span>View</span>
             </button>
-            <button className="px-5 hover:ring-1 bg-blue-500 text-white hover:text-blue-500 hover:bg-transparent transition hover:ring-blue-500 rounded h-10 w-36">
+            <button
+              type="button"
+              className="px-5 hover:ring-1 bg-blue-500 text-white hover:text-blue-500 hover:bg-transparent transition hover:ring-blue-500 rounded h-10 w-36"
+            >
               Post
             </button>
           </div>
@@ -131,13 +153,18 @@ const CreatePost = () => {
               onChange={handleImageUpload}
               hidden
               id="image-input"
+              disabled={imageUploading}
             />
             <label
               htmlFor="image-input"
               className="flex items-center cursor-pointer space-x-2 px-3 ring-1 text-gray-700 hover:text-white hover:bg-gray-700 transition ring-gray-700 rounded h-10 "
             >
               <span>Place Image</span>
-              <ImFilePicture />
+              {!imageUploading ? (
+                <ImFilePicture />
+              ) : (
+                <ImSpinner11 className="animate-spin" />
+              )}
             </label>
           </div>
           {imageUrlToCopy && (
@@ -148,7 +175,11 @@ const CreatePost = () => {
                 disabled
                 value={imageUrlToCopy}
               />
-              <button className="text-xs flex justify-center flex-col items-center self-stretch p-1 bg-gray-700 text-white">
+              <button
+                onClick={handleOnCopy}
+                type="button"
+                className="text-xs flex justify-center flex-col items-center self-stretch p-1 bg-gray-700 text-white"
+              >
                 <ImFilesEmpty />
                 <span>copy</span>
               </button>

@@ -5,6 +5,7 @@ export default {
     extend: {
       transitionProperty: {
         width: "width",
+        bottom: "bottom",
       },
     },
   },
