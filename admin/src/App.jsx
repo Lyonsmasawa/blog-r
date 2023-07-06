@@ -29,7 +29,7 @@ const App = () => {
       </div>
 
       {/* content section */}
-      <div className="flex-1 min-h-screen">
+      <div className="flex-1 min-h-screen bg-gray-100">
         <div className="sticky top-0">
           <div className="flex item-center p-2 space-x-2 ">
             <button onClick={toggleNav}>
