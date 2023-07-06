@@ -16,7 +16,7 @@ const mdRules = [
 const defaultPost = {
   title: "",
   thumbnail: "",
-  featured: "",
+  featured: false,
   tags: "",
   meta: "",
   content: "",
@@ -29,7 +29,7 @@ const CreatePost = () => {
   const [selectedImageUrl, setSelectedImageUrl] = useState("");
 
   const handleChange = ({ target }) => {
-    const { value, name } = target;
+    const { value, name, checked } = target;
 
     if (name === "thumbnail") {
       const file = target.files[0];
@@ -38,6 +38,18 @@ const CreatePost = () => {
       }
       setPostInfo({ ...postInfo, thumbnail: value });
       return setSelectedImageUrl(URL.createObjectURL(file));
+    }
+    if (name === "featured") {
+      return setPostInfo({ ...postInfo, [name]: checked });
+    }
+
+    if (name === "tags") {
+      const newTags = tags.split(", ");
+      if (newTags.length > 4) console.log("only 4 will be selected");
+    }
+
+    if (name === "meta" && meta.length >= 150) {
+      return setPostInfo({ ...postInfo, meta: meta.substring(0, 150) });
     }
 
     setPostInfo({ ...postInfo, [name]: value });
@@ -65,14 +77,22 @@ const CreatePost = () => {
             </button>
           </div>
         </div>
-        <div className="">
-          <input id="featured" type="checkbox" hidden />
+        <div className="flex">
+          <input
+            id="featured"
+            name="featured"
+            onChange={handleChange}
+            type="checkbox"
+            hidden
+          />
           <label
             htmlFor="featured"
-            className="flex items-center cursor-pointer group space-x-2 text-gray-700"
+            className="select-none flex items-center cursor-pointer group space-x-2 text-gray-700"
           >
             <div className="w-4 h-4 rounded-full border-2 border-gray-500 flex items-center justify-center group-hover:border-blue-500">
-              <div className="w-2 h-2 rounded-full bg-gray-500  group-hover:bg-blue-500"></div>
+              {featured && (
+                <div className="w-2 h-2 rounded-full bg-gray-500  group-hover:bg-blue-500"></div>
+              )}
             </div>
             <span className="group-hover:text-blue-500">Featured</span>
           </label>
@@ -144,7 +164,7 @@ const CreatePost = () => {
 
         {/* meta description input */}
         <div className="">
-          <label htmlFor="meta">Meta description</label>
+          <label htmlFor="meta">Meta description {meta?.length} / 150</label>
           <input
             name="meta"
             onChange={handleChange}
