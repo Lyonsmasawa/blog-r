@@ -5,6 +5,7 @@ import {
   ImFilePicture,
   ImFilesEmpty,
 } from "react-icons/im";
+import { uploadImage } from "../api/post";
 
 const mdRules = [
   { title: "From h1 to h6", rule: "# Heading -> ###### Heading" },
@@ -25,6 +26,7 @@ const defaultPost = {
 const CreatePost = () => {
   const [postInfo, setPostInfo] = useState({ ...defaultPost });
   const { title, featured, tags, meta, content } = postInfo;
+  const [imageUrlToCopy, setImageUrlToCopy] = useState("");
 
   const [selectedImageUrl, setSelectedImageUrl] = useState("");
 
@@ -53,6 +55,19 @@ const CreatePost = () => {
     }
 
     setPostInfo({ ...postInfo, [name]: value });
+  };
+
+  const handleImageUpload = async ({ target }) => {
+    const file = target.files[0];
+    if (!file.type.includes("image")) {
+      return alert("this is not an image!");
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+    const { error, image } = await uploadImage(formData);
+    if (error) return console.log(error);
+    setImageUrlToCopy(image);
   };
 
   return (
@@ -113,8 +128,7 @@ const CreatePost = () => {
           <div className="">
             <input
               type="file"
-              name="thumbnail"
-              onChange={handleChange}
+              onChange={handleImageUpload}
               hidden
               id="image-input"
             />
@@ -126,18 +140,20 @@ const CreatePost = () => {
               <ImFilePicture />
             </label>
           </div>
-          <div className="flex flex-1 bg-gray-400 justify-between rounded overflow-hidden">
-            <input
-              type="text"
-              className="bg-transparent px-2 text-white w-full"
-              disabled
-              value="https://res.cloudinary.com/xlyons/image/upload/v1688591343/fnr7usbsna9yt9ri6ler.jpg"
-            />
-            <button className="text-xs flex justify-center flex-col items-center self-stretch p-1 bg-gray-700 text-white">
-              <ImFilesEmpty />
-              <span>copy</span>
-            </button>
-          </div>
+          {imageUrlToCopy && (
+            <div className="flex flex-1 bg-gray-400 justify-between rounded overflow-hidden">
+              <input
+                type="text"
+                className="bg-transparent px-2 text-white w-full"
+                disabled
+                value={imageUrlToCopy}
+              />
+              <button className="text-xs flex justify-center flex-col items-center self-stretch p-1 bg-gray-700 text-white">
+                <ImFilesEmpty />
+                <span>copy</span>
+              </button>
+            </div>
+          )}
         </div>
 
         <textarea
@@ -186,7 +202,13 @@ const CreatePost = () => {
           />
         ) : (
           <div className="">
-            <input type="file" hidden id="thumbnail" />
+            <input
+              type="file"
+              hidden
+              id="thumbnail"
+              name="thumbnail"
+              onChange={handleChange}
+            />
             <label htmlFor="thumbnail" className="cursor-pointer">
               <div className="border border-dashed border-gray-500 aspect-video text-gray-500 flex flex-col justify-center items-center">
                 <span>Select thumbnail</span>
