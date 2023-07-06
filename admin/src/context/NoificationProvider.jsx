@@ -13,7 +13,7 @@ const NotificationProvider = ({ children }) => {
   const [bgColor, setBgColor] = useState("");
 
   const updateNotification = (type, value) => {
-    if (timeOutId) return clearTimeout(timeOutId);
+    if (timeOutId) clearTimeout(timeOutId);
     if (!type || !value) return;
 
     switch (type) {
@@ -43,6 +43,10 @@ const NotificationProvider = ({ children }) => {
   useEffect(() => {
     notificationRef.current?.classList.remove("bottom-14", "opacity-0");
     notificationRef.current?.classList.add("bottom-10", "opacity-1");
+    return () => {
+      notificationRef.current?.classList.add("bottom-14", "opacity-0");
+      notificationRef.current?.classList.remove("bottom-10", "opacity-1");
+    };
   }, [notification.value]);
 
   return (
