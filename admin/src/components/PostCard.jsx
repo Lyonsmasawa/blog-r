@@ -24,10 +24,16 @@ const PostCard = ({ post, onDeleteClick }) => {
         </div>
 
         <div className="flex space-x-3">
-          <Link to={`/update-post/${slug}`} className="w-8 h-8 rounded-full bg-blue-400 hover:bg-blue-600 justify-center items-center text-white">
+          <Link
+            to={`/update-post/${slug}`}
+            className="w-8 h-8 rounded-full bg-blue-400 hover:bg-blue-600 justify-center items-center text-white"
+          >
             <BsPencilSquare />
           </Link>
-          <button onClick={() => onDeleteClick(post)} className="w-8 h-8 rounded-full bg-red-400 hover:bg-red-600 justify-center items-center text-white">
+          <button
+            onClick={() => onDeleteClick(post)}
+            className="w-8 h-8 rounded-full bg-red-400 hover:bg-red-600 justify-center items-center text-white"
+          >
             <BsTrash />
           </button>
         </div>

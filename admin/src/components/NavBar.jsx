@@ -1,6 +1,6 @@
 import { AiFillFileAdd, AiOutlineHome } from "react-icons/ai";
 import { NavLink } from "react-router-dom";
-import logo from '../assets/logo.png'
+import logo from "../assets/logo.png";
 
 const NavItem = ({ to, value, closed, Icon }) => {
   const commonClasses =
@@ -14,7 +14,15 @@ const NavItem = ({ to, value, closed, Icon }) => {
       className={({ isActive }) => (isActive ? activeClass : inActiveClass)}
     >
       {Icon}
-      <span className={closed ? 'w-0 transition-width overflow-hidden' : 'w-full transition-width overflow-hidden'}>{value}</span>
+      <span
+        className={
+          closed
+            ? "w-0 transition-width overflow-hidden"
+            : "w-full transition-width overflow-hidden"
+        }
+      >
+        {value}
+      </span>
     </NavLink>
   );
 };
@@ -22,9 +30,9 @@ const NavItem = ({ to, value, closed, Icon }) => {
 const NavBar = ({ closed }) => {
   return (
     <nav>
-        <div className="flex justify-center p-3">
-            <img src={logo} className="w-14" alt="" />
-        </div>
+      <div className="flex justify-center p-3">
+        <img src={logo} className="w-14" alt="" />
+      </div>
       <ul>
         <li>
           <NavItem
