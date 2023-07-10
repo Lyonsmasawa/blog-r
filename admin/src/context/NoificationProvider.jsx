@@ -43,10 +43,10 @@ const NotificationProvider = ({ children }) => {
   useEffect(() => {
     notificationRef.current?.classList.remove("bottom-14", "opacity-0");
     notificationRef.current?.classList.add("bottom-10", "opacity-1");
-    return () => {
-      notificationRef.current?.classList.add("bottom-14", "opacity-0");
-      notificationRef.current?.classList.remove("bottom-10", "opacity-1");
-    };
+    // return () => {
+    //   notificationRef.current?.classList.add("bottom-14", "opacity-0");
+    //   notificationRef.current?.classList.remove("bottom-10", "opacity-1");
+    // };
   }, [notification.value]);
 
   return (
@@ -57,7 +57,7 @@ const NotificationProvider = ({ children }) => {
       {notification.value && (
         <p
           ref={notificationRef}
-          className={`${bgColor} + rounded-full p-2 text-white fixed bottom-14 opacity-0 right-1/2 -translate-x-12 transition-all duration-150 ease-linear`}
+          className={`${bgColor} + rounded p-2 px-4 text-white fixed bottom-14 opacity-0 right-1/2 -translate-x-12 transition-all duration-150 ease-linear`}
         >
           {" "}
           {notification.value}
