@@ -17,9 +17,8 @@ const SearchForm = () => {
     setQuery("");
   };
   const handleKeyDown = (e) => {
-    if (e.key == "Escape") {
+    if (e.key === "Escape") {
       resetSearch();
-      setQuery("");
     }
   };
 

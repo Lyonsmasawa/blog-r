@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { deletePosts, getPosts } from "../api/post";
 import PostCard from "./PostCard";
 import { useSearch } from "../context/SearchProvider";
+import { useNotification } from "../context/NoificationProvider";
 
 let pageNo = 0;
 const PAGE_LIMIT = 9;
@@ -18,6 +19,7 @@ const Home = () => {
   const { searchResult } = useSearch();
   const [posts, setPosts] = useState();
   const [totalPostCount, setTotalPostCount] = useState();
+  const { updateNotification } = useNotification();
 
   const paginationCount = getPaginationCount(totalPostCount) || 0;
 
@@ -26,7 +28,7 @@ const Home = () => {
   const fetchPosts = async () => {
     const { error, posts, postCount } = await getPosts(pageNo, PAGE_LIMIT);
 
-    if (error) return console.log(error);
+    if (error) return updateNotification("error", error);
 
     setPosts(posts);
     setTotalPostCount(postCount);
@@ -34,6 +36,8 @@ const Home = () => {
 
   useEffect(() => {
     fetchPosts();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchMorePosts = (index) => {
@@ -46,8 +50,8 @@ const Home = () => {
     if (!confirmed) return;
 
     const { error, message } = await deletePosts(id);
-    if (error) return console.log(error);
-    console.log(message);
+    if (error) return updateNotification("error", error);
+    updateNotification("success", message);
 
     const newPosts = posts.filter((p) => p.post.id !== id);
     setPosts(newPosts);
@@ -55,7 +59,6 @@ const Home = () => {
 
   return (
     <div className="">
-      {console.log(searchResult)}
       <div className="grid grid-cols-3 gap-3 pb-5">
         {searchResult?.length
           ? searchResult?.map((post) => {
